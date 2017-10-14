@@ -146,6 +146,13 @@ def fetch_query(remote_url, query):
     else:
         raise Exception('Gerrit URL should be in the form http[s]://hostname/ or ssh://[user@]host[:port]')
 
+def strip_github_username(project_name, remote_name=None):
+    if remote_name == None or remote_name == "github":
+        index = project_name.find('/', 1)
+        if index != -1:
+            return project_name[index + 1:]
+    return project_name
+
 if __name__ == '__main__':
     # Default to LineageOS Gerrit
     default_gerrit = 'https://review.lineageos.org'
@@ -254,6 +261,7 @@ if __name__ == '__main__':
             if revision is None:
                 revision = default_revision
 
+        name = strip_github_username(name, project.get('remote'))
         if not name in project_name_to_data:
             project_name_to_data[name] = {}
         revision = revision.split('refs/heads/')[-1]
@@ -323,7 +331,7 @@ if __name__ == '__main__':
 
         mergables.append({
             'subject': review['subject'],
-            'project': review['project'],
+            'project': strip_github_username(review['project']),
             'branch': review['branch'],
             'change_id': review['change_id'],
             'change_number': review['number'],
